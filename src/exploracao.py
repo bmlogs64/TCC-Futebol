@@ -366,3 +366,307 @@ print(
         ]
     ].head(10).to_string(index=False)
 )
+
+primeiro_colocado = ranking.iloc[0]
+
+indice_primeiro = primeiro_colocado.name
+posicao_primeiro = df_meias.index.get_loc(indice_primeiro)
+
+vetor_primeiro = features_padronizadas[posicao_primeiro]
+
+print("\n===== PRIMEIRO COLOCADO DO RANKING =====")
+print("Jogador:", primeiro_colocado["Player"])
+print("Clube:", primeiro_colocado["Squad"])
+print("Distância:", primeiro_colocado["Distancia"])
+print("Posição na matriz:", posicao_primeiro)
+
+print("\n===== COMPARAÇÃO KEVIN x LO CELSO =====")
+
+for feature, valor_kevin, valor_primeiro in zip(
+    features,
+    vetor_kevin,
+    vetor_primeiro
+):
+    diferenca = abs(valor_kevin - valor_primeiro)
+
+    print(
+        f"{feature}: "
+        f"Kevin={valor_kevin:.4f} | "
+        f"Lo Celso={valor_primeiro:.4f} | "
+        f"Diferença={diferenca:.4f}"
+    )
+
+print("\n===== CONTRIBUIÇÃO PARA A DISTÂNCIA =====")
+
+for feature, valor_kevin, valor_primeiro in zip(
+    features,
+    vetor_kevin,
+    vetor_primeiro
+):
+    diferenca = valor_kevin - valor_primeiro
+    contribuicao = diferenca ** 2
+
+    print(
+        f"{feature}: "
+        f"{contribuicao:.4f}"
+    )
+
+diferencas = vetor_kevin - vetor_primeiro
+
+soma_quadrados = np.sum(
+    diferencas ** 2
+)
+
+distancia_manual = np.sqrt(
+    soma_quadrados
+)
+
+print("\n===== VERIFICAÇÃO DA DISTÂNCIA =====")
+print(f"Soma dos quadrados: {soma_quadrados:.4f}")
+print(f"Raiz quadrada: {distancia_manual:.4f}")
+print(f"Distância calculada anteriormente: {primeiro_colocado['Distancia']:.4f}")
+
+print("\n===== VERIFICAÇÃO DA FEATURE Succ% =====")
+
+print(
+    df_meias.loc[
+        df_meias["Player"].isin(
+            [nome_referencia, primeiro_colocado["Player"]]
+        ),
+        ["Player", "Squad", "Succ", "Att_stats_possession", "Succ%"]
+    ].to_string(index=False)
+)
+
+print("\n===== VALIDAÇÃO DO Succ% =====")
+
+for nome in [nome_referencia, primeiro_colocado["Player"]]:
+
+    jogador = df_meias[
+        df_meias["Player"] == nome
+    ].iloc[0]
+
+    percentual_calculado = (
+        jogador["Succ"] /
+        jogador["Att_stats_possession"]
+    ) * 100
+
+    print(
+        f"{nome}: "
+        f"calculado={percentual_calculado:.2f}% | "
+        f"dataset={jogador['Succ%']:.2f}%"
+    )
+
+correlacoes = df_meias[features].corr()
+
+print("\n===== MATRIZ DE CORRELAÇÃO =====")
+print(
+    correlacoes.round(2).to_string()
+)
+
+print("\n===== CORRELAÇÕES ALTAS =====")
+
+limite_correlacao = 0.80
+
+for i in range(len(features)):
+    for j in range(i + 1, len(features)):
+
+        correlacao = correlacoes.iloc[i, j]
+
+        if abs(correlacao) >= limite_correlacao:
+            print(
+                f"{features[i]} x {features[j]}: "
+                f"{correlacao:.2f}"
+            )
+
+print("\n===== KP_90 x SCA90 =====")
+
+print(
+    df_meias[
+        [
+            "Player",
+            "Squad",
+            "KP_90",
+            "SCA90"
+        ]
+    ]
+    .sort_values(
+        by="KP_90",
+        ascending=False
+    )
+    .head(10)
+    .to_string(index=False)
+)
+
+percentil_kp = (
+    (df_meias["KP_90"] <= jogador_referencia["KP"].iloc[0] /
+     jogador_referencia["90s"].iloc[0]).mean()
+    * 100
+)
+
+percentil_sca = (
+    (df_meias["SCA90"] <= jogador_referencia["SCA90"].iloc[0]).mean()
+    * 100
+)
+
+print("\n===== POSIÇÃO DO KEVIN NAS MÉTRICAS =====")
+print(f"KP_90: percentil {percentil_kp:.2f}")
+print(f"SCA90: percentil {percentil_sca:.2f}")
+
+features_revisadas = [
+    "xG_90",
+    "xAG_90",
+    "Sh/90",
+    "SoT/90",
+    "Cmp%",
+    "KP_90",
+    "PPA_90",
+    "PrgP_90",
+    "GCA90",
+    "Touches_90",
+    "Succ%",
+    "PrgC_90",
+    "CPA_90",
+    "Recov_90"
+]
+
+scaler_revisado = StandardScaler()
+
+scaler_revisado.fit(
+    df_meias[features_revisadas]
+)
+
+features_revisadas_padronizadas = scaler_revisado.transform(
+    df_meias[features_revisadas]
+)
+
+print("\n===== MODELO REVISADO =====")
+print(
+    "Formato:",
+    features_revisadas_padronizadas.shape
+)
+
+vetor_kevin_revisado = features_revisadas_padronizadas[
+    posicao_kevin
+]
+
+distancias_revisadas = np.linalg.norm(
+    features_revisadas_padronizadas - vetor_kevin_revisado,
+    axis=1
+)
+
+print("\n===== DISTÂNCIAS DO MODELO REVISADO =====")
+print("Quantidade de distâncias:", len(distancias_revisadas))
+print(
+    "Distância do Kevin para ele mesmo:",
+    distancias_revisadas[posicao_kevin]
+)
+
+ranking_revisado = df_meias.copy()
+
+ranking_revisado["Distancia_Revisada"] = distancias_revisadas
+
+ranking_revisado = ranking_revisado[
+    ranking_revisado["Player"] != nome_referencia
+].copy()
+
+ranking_revisado = ranking_revisado.sort_values(
+    by="Distancia_Revisada",
+    ascending=True
+)
+
+print("\n===== TOP 10 - MODELO REVISADO =====")
+
+print(
+    ranking_revisado[
+        [
+            "Player",
+            "Age",
+            "Pos",
+            "Squad",
+            "Comp",
+            "Distancia_Revisada"
+        ]
+    ]
+    .head(10)
+    .to_string(index=False)
+)
+
+top_baseline = ranking.head(10).reset_index(drop=True)
+top_revisado = ranking_revisado.head(10).reset_index(drop=True)
+
+print("\n===== COMPARAÇÃO DOS RANKINGS =====")
+
+for i in range(10):
+    jogador_baseline = top_baseline.iloc[i]["Player"]
+    jogador_revisado = top_revisado.iloc[i]["Player"]
+
+    print(
+        f"{i + 1}º | "
+        f"Baseline: {jogador_baseline} | "
+        f"Revisado: {jogador_revisado}"
+    )
+
+print("\n===== Sh/90 x SoT/90 =====")
+
+jogadores_top = [
+    nome_referencia
+] + ranking.head(5)["Player"].tolist()
+
+print(
+    df_meias[
+        df_meias["Player"].isin(jogadores_top)
+    ][
+        [
+            "Player",
+            "Squad",
+            "Sh/90",
+            "SoT/90",
+            "xG_90"
+        ]
+    ]
+    .sort_values(
+        by="Sh/90",
+        ascending=False
+    )
+    .to_string(index=False)
+)
+
+print("\n===== PrgC_90 x CPA_90 =====")
+
+print(
+    df_meias[
+        df_meias["Player"].isin(jogadores_top)
+    ][
+        [
+            "Player",
+            "Squad",
+            "PrgC_90",
+            "CPA_90"
+        ]
+    ]
+    .sort_values(
+        by="PrgC_90",
+        ascending=False
+    )
+    .to_string(index=False)
+)
+
+print("\n===== PrgP_90 x Touches_90 =====")
+
+print(
+    df_meias[
+        df_meias["Player"].isin(jogadores_top)
+    ][
+        [
+            "Player",
+            "Squad",
+            "PrgP_90",
+            "Touches_90"
+        ]
+    ]
+    .sort_values(
+        by="Touches_90",
+        ascending=False
+    )
+    .to_string(index=False)
+)
