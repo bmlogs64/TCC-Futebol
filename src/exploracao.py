@@ -850,3 +850,654 @@ if teste_recomendacao is not None:
             ]
         ].to_string(index=False)
     )
+
+df_atacantes = df[
+    (df["Min"] >= 900) &
+    (df["Pos"].str.contains("FW", na=False))
+].copy()
+
+print("\n===== ATACANTES =====")
+print("Quantidade de registros:", len(df_atacantes))
+
+print("\nPosições encontradas:")
+print(
+    df_atacantes["Pos"].value_counts()
+)
+
+print("\n===== COLUNAS PARA ANÁLISE DOS ATACANTES =====")
+
+for coluna in df.columns:
+    if any(
+        termo.lower() in coluna.lower()
+        for termo in [
+            "Goal",
+            "Gls",
+            "xG",
+            "Shot",
+            "Sh",
+            "SoT",
+            "Touch",
+            "Carr",
+            "Prog",
+            "Prg",
+            "Penalty",
+            "PK",
+            "SCA",
+            "GCA"
+        ]
+    ):
+        print(coluna)
+
+df_atacantes["Gls_90"] = (
+    df_atacantes["Gls"] / df_atacantes["90s"]
+)
+
+df_atacantes["npxG_90"] = (
+    df_atacantes["npxG"] / df_atacantes["90s"]
+)
+
+df_atacantes["PrgR_90"] = (
+    df_atacantes["PrgR"] / df_atacantes["90s"]
+)
+
+df_atacantes["PrgC_90"] = (
+    df_atacantes["PrgC"] / df_atacantes["90s"]
+)
+
+print("\n===== MÉTRICAS POR 90 DOS ATACANTES =====")
+
+print(
+    df_atacantes[
+        [
+            "Player",
+            "Gls_90",
+            "npxG_90",
+            "PrgR_90",
+            "PrgC_90"
+        ]
+    ]
+    .head(10)
+    .to_string(index=False)
+)
+
+features_candidatas_atacantes = [
+    "Gls_90",
+    "npxG_90",
+    "Sh/90",
+    "SoT/90",
+    "SoT%",
+    "npxG/Sh",
+    "G/Sh",
+    "PrgR_90",
+    "PrgC_90",
+    "SCA90",
+    "GCA90"
+]
+
+print("\n===== VALORES AUSENTES - ATACANTES =====")
+
+print(
+    df_atacantes[
+        features_candidatas_atacantes
+    ].isna().sum()
+)
+
+correlacao_atacantes = df_atacantes[
+    features_candidatas_atacantes
+].corr()
+
+print("\n===== CORRELAÇÃO ENTRE FEATURES DOS ATACANTES =====")
+
+print(
+    correlacao_atacantes.round(2).to_string()
+)
+
+comparacao_gols_xg = df_atacantes[
+    [
+        "Player",
+        "Squad",
+        "Gls_90",
+        "npxG_90"
+    ]
+].copy()
+
+comparacao_gols_xg["Diferenca"] = (
+    comparacao_gols_xg["Gls_90"]
+    - comparacao_gols_xg["npxG_90"]
+)
+
+comparacao_gols_xg = comparacao_gols_xg.sort_values(
+    by="Diferenca",
+    ascending=False
+)
+
+print("\n===== MAIOR DIFERENÇA GOLS x npxG =====")
+
+print(
+    comparacao_gols_xg
+    .head(10)
+    .to_string(index=False)
+)
+
+print("\n===== MENOR DIFERENÇA GOLS x npxG =====")
+
+print(
+    comparacao_gols_xg
+    .tail(10)
+    .to_string(index=False)
+)
+
+comparacao_chutes = df_atacantes[
+    [
+        "Player",
+        "Squad",
+        "Sh/90",
+        "SoT/90",
+        "SoT%"
+    ]
+].copy()
+
+comparacao_chutes = comparacao_chutes.sort_values(
+    by="Sh/90",
+    ascending=False
+)
+
+print("\n===== CHUTES DOS ATACANTES =====")
+
+print(
+    comparacao_chutes
+    .head(15)
+    .to_string(index=False)
+)
+
+comparacao_progressao_atacantes = df_atacantes[
+    [
+        "Player",
+        "Squad",
+        "PrgR_90",
+        "PrgC_90"
+    ]
+].copy()
+
+comparacao_progressao_atacantes = (
+    comparacao_progressao_atacantes.sort_values(
+        by="PrgR_90",
+        ascending=False
+    )
+)
+
+print("\n===== PROGRESSÃO DOS ATACANTES =====")
+
+print(
+    comparacao_progressao_atacantes
+    .head(15)
+    .to_string(index=False)
+)
+
+comparacao_qualidade_chutes = df_atacantes[
+    [
+        "Player",
+        "Squad",
+        "npxG/Sh",
+        "G/Sh",
+        "Gls_90",
+        "Sh/90"
+    ]
+].copy()
+
+comparacao_qualidade_chutes = (
+    comparacao_qualidade_chutes.sort_values(
+        by="npxG/Sh",
+        ascending=False
+    )
+)
+
+print("\n===== QUALIDADE DOS CHUTES =====")
+
+print(
+    comparacao_qualidade_chutes
+    .head(15)
+    .to_string(index=False)
+)
+
+features_atacantes = [
+    "Gls_90",
+    "npxG_90",
+    "Sh/90",
+    "SoT/90",
+    "SoT%",
+    "npxG/Sh",
+    "G/Sh",
+    "PrgR_90",
+    "PrgC_90",
+    "SCA90",
+    "GCA90"
+]
+
+scaler_atacantes = StandardScaler()
+
+features_atacantes_padronizadas = scaler_atacantes.fit_transform(
+    df_atacantes[features_atacantes]
+)
+
+print("\n===== PADRONIZAÇÃO DOS ATACANTES =====")
+
+print(
+    "Formato da matriz:",
+    features_atacantes_padronizadas.shape
+)
+
+print(
+    "Quantidade de jogadores:",
+    len(df_atacantes)
+)
+
+print(
+    "Quantidade de features:",
+    len(features_atacantes)
+)
+
+nome_referencia_atacante = "Kylian Mbappé"
+
+atacantes_encontrados = df_atacantes[
+    df_atacantes["Player"] == nome_referencia_atacante
+]
+
+print("\n===== ATACANTE DE REFERÊNCIA =====")
+
+print(
+    atacantes_encontrados[
+        [
+            "Player",
+            "Squad",
+            "Comp",
+            "Pos",
+            "Min"
+        ]
+    ].to_string(index=False)
+)
+
+print(
+    "Quantidade de registros encontrados:",
+    len(atacantes_encontrados)
+)
+
+if len(atacantes_encontrados) == 1:
+
+    indice_referencia_atacante = atacantes_encontrados.index[0]
+
+    posicao_referencia_atacante = df_atacantes.index.get_loc(
+        indice_referencia_atacante
+    )
+
+    vetor_referencia_atacante = features_atacantes_padronizadas[
+        posicao_referencia_atacante
+    ]
+
+    print("\n===== ATACANTE LOCALIZADO =====")
+
+    print(
+        "Índice no DataFrame:",
+        indice_referencia_atacante
+    )
+
+    print(
+        "Posição na matriz:",
+        posicao_referencia_atacante
+    )
+
+    print(
+        "Quantidade de features:",
+        len(vetor_referencia_atacante)
+    )
+
+distancias_atacantes = np.linalg.norm(
+    features_atacantes_padronizadas
+    - vetor_referencia_atacante,
+    axis=1
+)
+
+print("\n===== TESTE DAS DISTÂNCIAS - ATACANTES =====")
+
+print(
+    "Quantidade de distâncias:",
+    len(distancias_atacantes)
+)
+
+print(
+    "Distância do Mbappé para ele mesmo:",
+    distancias_atacantes[posicao_referencia_atacante]
+)
+
+ranking_atacantes = df_atacantes.copy()
+
+ranking_atacantes["Distancia"] = distancias_atacantes
+
+ranking_atacantes = ranking_atacantes[
+    ranking_atacantes["Player"] != nome_referencia_atacante
+].copy()
+
+ranking_atacantes = ranking_atacantes.sort_values(
+    by="Distancia",
+    ascending=True
+)
+
+print("\n===== TOP 10 ATACANTES SEMELHANTES A MBAPPÉ =====")
+
+print(
+    ranking_atacantes[
+        [
+            "Player",
+            "Squad",
+            "Pos",
+            "Min",
+            "Distancia"
+        ]
+    ]
+    .head(10)
+    .to_string(index=False)
+)
+
+comparacao_mbappe_sane = pd.DataFrame({
+    "Feature": features_atacantes,
+    "Mbappe": df_atacantes.loc[
+        indice_referencia_atacante,
+        features_atacantes
+    ].values,
+    "Sane": ranking_atacantes.iloc[0][
+        features_atacantes
+    ].values
+})
+
+print("\n===== MBAPPÉ x SANÉ =====")
+
+print(
+    comparacao_mbappe_sane.to_string(index=False)
+)
+
+indice_sane = ranking_atacantes.iloc[0].name
+
+posicao_sane = df_atacantes.index.get_loc(
+    indice_sane
+)
+
+vetor_sane = features_atacantes_padronizadas[
+    posicao_sane
+]
+
+diferencas = vetor_referencia_atacante - vetor_sane
+
+quadrados = diferencas ** 2
+
+soma_quadrados = np.sum(quadrados)
+
+distancia_manual = np.sqrt(soma_quadrados)
+
+print("\n===== VALIDAÇÃO MANUAL DA DISTÂNCIA =====")
+
+print(
+    "Soma dos quadrados:",
+    soma_quadrados
+)
+
+print(
+    "Raiz da soma:",
+    distancia_manual
+)
+
+print(
+    "Distância do ranking:",
+    ranking_atacantes.iloc[0]["Distancia"]
+)
+
+features_atacantes_teste = [
+    "Gls_90",
+    "npxG_90",
+    "Sh/90",
+    "SoT%",
+    "npxG/Sh",
+    "G/Sh",
+    "PrgR_90",
+    "PrgC_90",
+    "SCA90",
+    "GCA90"
+]
+
+scaler_atacantes_teste = StandardScaler()
+
+matriz_atacantes_teste = scaler_atacantes_teste.fit_transform(
+    df_atacantes[features_atacantes_teste]
+)
+
+vetor_mbappe_teste = matriz_atacantes_teste[
+    posicao_referencia_atacante
+]
+
+distancias_teste = np.linalg.norm(
+    matriz_atacantes_teste - vetor_mbappe_teste,
+    axis=1
+)
+
+ranking_teste = df_atacantes.copy()
+ranking_teste["Distancia"] = distancias_teste
+
+ranking_teste = ranking_teste[
+    ranking_teste["Player"] != nome_referencia_atacante
+].sort_values("Distancia")
+
+print("\n===== TOP 10 SEM SoT/90 =====")
+
+print(
+    ranking_teste[
+        ["Player", "Squad", "Distancia"]
+    ]
+    .head(10)
+    .to_string(index=False)
+)
+
+top10_original = set(
+    ranking_atacantes.head(10)["Player"]
+)
+
+top10_teste = set(
+    ranking_teste.head(10)["Player"]
+)
+
+jogadores_em_comum = top10_original.intersection(
+    top10_teste
+)
+
+print("\n===== ESTABILIDADE DO TOP 10 =====")
+
+print(
+    "Jogadores em comum:",
+    len(jogadores_em_comum),
+    "de 10"
+)
+
+print(
+    "Percentual de permanência:",
+    len(jogadores_em_comum) / 10 * 100,
+    "%"
+)
+
+print(
+    "Saiu do Top 10:",
+    top10_original - top10_teste
+)
+
+print(
+    "Entrou no Top 10:",
+    top10_teste - top10_original
+)
+
+nome_teste_atacante = "Harry Kane"
+
+jogador_teste = df_atacantes[
+    df_atacantes["Player"] == nome_teste_atacante
+]
+
+print("\n===== SEGUNDO ATACANTE DE REFERÊNCIA =====")
+
+print(
+    jogador_teste[
+        [
+            "Player",
+            "Squad",
+            "Comp",
+            "Pos",
+            "Min"
+        ]
+    ].to_string(index=False)
+)
+
+print(
+    "Quantidade de registros encontrados:",
+    len(jogador_teste)
+)
+
+indice_kane = jogador_teste.index[0]
+
+posicao_kane = df_atacantes.index.get_loc(
+    indice_kane
+)
+
+vetor_kane = features_atacantes_padronizadas[
+    posicao_kane
+]
+
+distancias_kane = np.linalg.norm(
+    features_atacantes_padronizadas - vetor_kane,
+    axis=1
+)
+
+ranking_kane = df_atacantes.copy()
+
+ranking_kane["Distancia"] = distancias_kane
+
+ranking_kane = ranking_kane[
+    ranking_kane["Player"] != nome_teste_atacante
+].copy()
+
+ranking_kane = ranking_kane.sort_values(
+    by="Distancia",
+    ascending=True
+)
+
+print("\n===== TOP 10 ATACANTES SEMELHANTES A HARRY KANE =====")
+
+print(
+    ranking_kane[
+        [
+            "Player",
+            "Squad",
+            "Pos",
+            "Min",
+            "Distancia"
+        ]
+    ]
+    .head(10)
+    .to_string(index=False)
+)
+
+top10_mbappe = set(
+    ranking_atacantes.head(10)["Player"]
+)
+
+top10_kane = set(
+    ranking_kane.head(10)["Player"]
+)
+
+comuns_mbappe_kane = top10_mbappe.intersection(
+    top10_kane
+)
+
+print("\n===== MBAPPÉ x KANE =====")
+
+print(
+    "Jogadores em comum:",
+    len(comuns_mbappe_kane),
+    "de 10"
+)
+
+print(
+    "Jogadores em comum:",
+    comuns_mbappe_kane
+)
+
+def recomendar_atacantes(
+    nome_jogador,
+    quantidade=10,
+    clube=None
+):
+    jogadores_encontrados = df_atacantes[
+        df_atacantes["Player"] == nome_jogador
+    ]
+
+    if len(jogadores_encontrados) == 0:
+        print(f"Jogador '{nome_jogador}' não encontrado.")
+        return None
+
+    if len(jogadores_encontrados) > 1:
+        if clube is None:
+            print(
+                f"Existem {len(jogadores_encontrados)} registros "
+                f"para '{nome_jogador}'. Escolha um clube:"
+            )
+
+            print(
+                jogadores_encontrados[
+                    ["Squad", "Comp", "Pos", "Min"]
+                ].to_string(index=False)
+            )
+
+            return None
+
+        jogadores_encontrados = jogadores_encontrados[
+            jogadores_encontrados["Squad"] == clube
+        ]
+
+        if len(jogadores_encontrados) == 0:
+            print(
+                f"Não foi encontrado '{nome_jogador}' "
+                f"no clube '{clube}'."
+            )
+            return None
+
+    indice = jogadores_encontrados.index[0]
+
+    posicao = df_atacantes.index.get_loc(indice)
+
+    vetor = features_atacantes_padronizadas[
+        posicao
+    ]
+
+    distancias = np.linalg.norm(
+        features_atacantes_padronizadas - vetor,
+        axis=1
+    )
+
+    resultado = df_atacantes.copy()
+
+    resultado["Distancia"] = distancias
+
+    resultado = resultado[
+        resultado["Player"] != nome_jogador
+    ].copy()
+
+    resultado = resultado.sort_values(
+        by="Distancia",
+        ascending=True
+    )
+
+    return resultado.head(quantidade)
+
+teste_funcao_atacantes = recomendar_atacantes(
+    "Kylian Mbappé"
+)
+
+print(
+    teste_funcao_atacantes[
+        ["Player", "Squad", "Pos", "Distancia"]
+    ].to_string(index=False)
+)
