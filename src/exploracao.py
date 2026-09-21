@@ -670,3 +670,183 @@ print(
     )
     .to_string(index=False)
 )
+
+nome_referencia = "Martin Ødegaard"
+
+jogadores_encontrados = df_meias[
+    df_meias["Player"] == nome_referencia
+]
+
+print("\n===== JOGADOR DE REFERÊNCIA =====")
+
+print(
+    jogadores_encontrados[
+        [
+            "Player",
+            "Squad",
+            "Comp",
+            "Pos",
+            "Min"
+        ]
+    ].to_string(index=False)
+)
+
+print(
+    "Quantidade de registros encontrados:",
+    len(jogadores_encontrados)
+)
+
+if len(jogadores_encontrados) == 1:
+
+    indice_referencia = jogadores_encontrados.index[0]
+
+    posicao_referencia = df_meias.index.get_loc(
+        indice_referencia
+    )
+
+    vetor_referencia = features_revisadas_padronizadas[
+        posicao_referencia
+    ]
+
+    print("\n===== REFERÊNCIA LOCALIZADA =====")
+    print("Índice no DataFrame:", indice_referencia)
+    print("Posição na matriz:", posicao_referencia)
+    print("Quantidade de features:", len(vetor_referencia))
+
+if len(jogadores_encontrados) == 1:
+
+    distancias_referencia = np.linalg.norm(
+        features_revisadas_padronizadas - vetor_referencia,
+        axis=1
+    )
+
+    ranking_dinamico = df_meias.copy()
+
+    ranking_dinamico["Distancia"] = distancias_referencia
+
+    ranking_dinamico = ranking_dinamico[
+        ranking_dinamico["Player"] != nome_referencia
+    ].copy()
+
+    ranking_dinamico = ranking_dinamico.sort_values(
+        by="Distancia",
+        ascending=True
+    )
+
+    print("\n===== TOP 10 DINÂMICO =====")
+
+    print(
+        ranking_dinamico[
+            [
+                "Player",
+                "Age",
+                "Pos",
+                "Squad",
+                "Comp",
+                "Min",
+                "Distancia"
+            ]
+        ]
+        .head(10)
+        .to_string(index=False)
+    )
+def recomendar_jogadores(
+    nome_jogador,
+    quantidade=10,
+    clube=None
+):
+    jogadores_encontrados = df_meias[
+        df_meias["Player"] == nome_jogador
+    ]
+
+    if len(jogadores_encontrados) == 0:
+        print(
+            f"Jogador '{nome_jogador}' não encontrado."
+        )
+        return None
+
+    if len(jogadores_encontrados) > 1:
+
+        if clube is None:
+            print(
+                f"Existem {len(jogadores_encontrados)} registros "
+                f"para '{nome_jogador}'. Escolha um clube:"
+            )
+
+            print(
+                jogadores_encontrados[
+                    [
+                        "Squad",
+                        "Comp",
+                        "Pos",
+                        "Min"
+                    ]
+                ].to_string(index=False)
+            )
+
+            return None
+
+        jogadores_encontrados = jogadores_encontrados[
+            jogadores_encontrados["Squad"] == clube
+        ]
+
+        if len(jogadores_encontrados) == 0:
+            print(
+                f"Não foi encontrado '{nome_jogador}' "
+                f"no clube '{clube}'."
+            )
+            return None
+
+    indice = jogadores_encontrados.index[0]
+
+    posicao = df_meias.index.get_loc(
+        indice
+    )
+
+    vetor = features_revisadas_padronizadas[
+        posicao
+    ]
+
+    distancias = np.linalg.norm(
+        features_revisadas_padronizadas - vetor,
+        axis=1
+    )
+
+    resultado = df_meias.copy()
+
+    resultado["Distancia"] = distancias
+
+    resultado = resultado[
+        resultado["Player"] != nome_jogador
+    ].copy()
+
+    resultado = resultado.sort_values(
+        by="Distancia",
+        ascending=True
+    )
+
+    return resultado.head(quantidade)
+
+teste_recomendacao = recomendar_jogadores(
+    "Amine Gouiri",
+    10,
+    clube="Barcelona"
+)
+
+if teste_recomendacao is not None:
+
+    print("\n===== TESTE DA FUNÇÃO =====")
+
+    print(
+        teste_recomendacao[
+            [
+                "Player",
+                "Age",
+                "Pos",
+                "Squad",
+                "Comp",
+                "Min",
+                "Distancia"
+            ]
+        ].to_string(index=False)
+    )
