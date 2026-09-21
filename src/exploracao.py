@@ -4,6 +4,8 @@ import os
 
 from sklearn.preprocessing import StandardScaler
 
+import numpy as np
+
 path = kagglehub.dataset_download(
     "hubertsidorowicz/football-players-stats-2024-2025"
 )
@@ -298,3 +300,69 @@ print("\n===== FEATURES PADRONIZADAS DO KEVIN =====")
 
 for feature, valor in zip(features, vetor_kevin):
     print(f"{feature}: {valor:.4f}")
+
+
+posicao_teste = 0
+
+jogador_teste = df_meias.iloc[posicao_teste]
+vetor_teste = features_padronizadas[posicao_teste]
+
+print("\n===== JOGADOR DE TESTE =====")
+print("Jogador:", jogador_teste["Player"])
+print("Clube:", jogador_teste["Squad"])
+print("Posição:", jogador_teste["Pos"])
+
+distancia = np.linalg.norm(
+    vetor_kevin - vetor_teste
+)
+
+print("\n===== DISTÂNCIA EUCLIDIANA =====")
+print(
+    f"Distância entre {nome_referencia} e "
+    f"{jogador_teste['Player']}: {distancia:.4f}"
+)
+
+distancias = np.linalg.norm(
+    features_padronizadas - vetor_kevin,
+    axis=1
+)
+
+print("\n===== DISTÂNCIAS CALCULADAS =====")
+print("Quantidade de distâncias:", len(distancias))
+
+df_meias["Distancia"] = distancias
+
+print("\n===== DISTÂNCIA DO JOGADOR DE REFERÊNCIA =====")
+
+print(
+    df_meias[
+        df_meias["Player"] == nome_referencia
+    ][
+        ["Player", "Squad", "Distancia"]
+    ].to_string(index=False)
+)
+
+ranking = df_meias[
+    df_meias["Player"] != nome_referencia
+].copy()
+
+ranking = ranking.sort_values(
+    by="Distancia",
+    ascending=True
+)
+
+print("\n===== TOP 10 JOGADORES MAIS SEMELHANTES =====")
+
+print(
+    ranking[
+        [
+            "Player",
+            "Age",
+            "Pos",
+            "Squad",
+            "Comp",
+            "Min",
+            "Distancia"
+        ]
+    ].head(10).to_string(index=False)
+)
