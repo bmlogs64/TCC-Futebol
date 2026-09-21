@@ -131,3 +131,135 @@ registros_repetidos = registros_repetidos[
 print(
     registros_repetidos.to_string(index=False)
 )
+
+print("\n===== MEIO-CAMPISTAS =====")
+
+df_meias = df_validos[
+    df_validos["Pos"].str.contains("MF", na=False)
+].copy()
+
+print("Quantidade de meio-campistas:", len(df_meias))
+
+print("\nDistribuição das posições:")
+print(df_meias["Pos"].value_counts())
+
+print("\n===== JOGADOR DE REFERÊNCIA =====")
+
+nome_referencia = "Kevin De Bruyne"
+
+jogador_referencia = df_meias[
+    df_meias["Player"] == nome_referencia
+]
+
+print(
+    jogador_referencia[
+        [
+            "Player",
+            "Nation",
+            "Age",
+            "Pos",
+            "Squad",
+            "Comp",
+            "MP",
+            "Starts",
+            "Min",
+            "90s"
+        ]
+    ].to_string(index=False)
+)
+
+metricas_candidatas = [
+    "xG",
+    "xAG",
+    "Sh/90",
+    "SoT/90",
+    "Cmp%",
+    "KP",
+    "PPA",
+    "PrgP",
+    "SCA90",
+    "GCA90",
+    "Touches",
+    "Succ%",
+    "PrgC",
+    "CPA",
+    "Recov"
+]
+
+print("\n===== MÉTRICAS DO JOGADOR DE REFERÊNCIA =====")
+
+print(
+    jogador_referencia[
+        ["Player"] + metricas_candidatas
+    ].to_string(index=False)
+)
+
+print("\n===== CRIAÇÃO DAS MÉTRICAS POR 90 MINUTOS =====")
+
+metricas_totais = [
+    "xG",
+    "xAG",
+    "KP",
+    "PPA",
+    "PrgP",
+    "Touches",
+    "PrgC",
+    "CPA",
+    "Recov"
+]
+
+for metrica in metricas_totais:
+    nova_coluna = metrica + "_90"
+
+    df_meias[nova_coluna] = (
+        df_meias[metrica] / df_meias["90s"]
+    )
+
+print(
+    df_meias[
+        [
+            "Player",
+            "90s",
+            "xG",
+            "xG_90",
+            "xAG",
+            "xAG_90",
+            "KP",
+            "KP_90",
+            "PrgP",
+            "PrgP_90"
+        ]
+    ][
+        df_meias["Player"] == nome_referencia
+    ].to_string(index=False)
+)
+
+features = [
+    "xG_90",
+    "xAG_90",
+    "Sh/90",
+    "SoT/90",
+    "Cmp%",
+    "KP_90",
+    "PPA_90",
+    "PrgP_90",
+    "SCA90",
+    "GCA90",
+    "Touches_90",
+    "Succ%",
+    "PrgC_90",
+    "CPA_90",
+    "Recov_90"
+]
+
+print("\n===== VALORES AUSENTES NAS FEATURES =====")
+
+valores_ausentes = df_meias[features].isna().sum()
+
+print(valores_ausentes)
+
+print("\n===== ESTATÍSTICAS DAS FEATURES =====")
+
+estatisticas_features = df_meias[features].describe()
+
+print(estatisticas_features.to_string())
