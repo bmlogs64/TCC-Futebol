@@ -2,6 +2,8 @@ import kagglehub
 import pandas as pd
 import os
 
+from sklearn.preprocessing import StandardScaler
+
 path = kagglehub.dataset_download(
     "hubertsidorowicz/football-players-stats-2024-2025"
 )
@@ -263,3 +265,36 @@ print("\n===== ESTATÍSTICAS DAS FEATURES =====")
 estatisticas_features = df_meias[features].describe()
 
 print(estatisticas_features.to_string())
+
+scaler = StandardScaler()
+
+scaler.fit(df_meias[features])
+
+features_padronizadas = scaler.transform(
+    df_meias[features]
+)
+
+print("\n===== MATRIZ PADRONIZADA =====")
+print("Formato:", features_padronizadas.shape)
+
+indice_kevin = df_meias.index[
+    df_meias["Player"] == nome_referencia
+][0]
+
+print("\n===== ÍNDICE DO JOGADOR DE REFERÊNCIA =====")
+print("Índice original:", indice_kevin)
+
+posicao_kevin = df_meias.index.get_loc(indice_kevin)
+
+print("\n===== POSIÇÃO NA MATRIZ PADRONIZADA =====")
+print("Posição do Kevin:", posicao_kevin)
+
+vetor_kevin = features_padronizadas[posicao_kevin]
+
+print("\n===== VETOR PADRONIZADO DO KEVIN =====")
+print(vetor_kevin)
+
+print("\n===== FEATURES PADRONIZADAS DO KEVIN =====")
+
+for feature, valor in zip(features, vetor_kevin):
+    print(f"{feature}: {valor:.4f}")
