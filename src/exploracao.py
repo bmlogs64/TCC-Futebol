@@ -2485,3 +2485,502 @@ print(
         ]
     ].to_string(index=False)
 )
+
+df_goleiros = df[
+    (df["Min"] >= 900) &
+    (df["Pos"] == "GK")
+].copy()
+
+print("\n===== GOLEIROS =====")
+
+print(
+    "Quantidade de goleiros:",
+    len(df_goleiros)
+)
+
+print("\nPosições encontradas:")
+
+print(
+    df_goleiros["Pos"]
+    .value_counts()
+    .to_string()
+)
+
+print("\n===== COLUNAS RELACIONADAS A GOLEIROS =====")
+
+termos_goleiros = [
+    "Save",
+    "GA",
+    "CS",
+    "PSxG",
+    "PK",
+    "Launch",
+    "Cross",
+    "Stp",
+    "OPA"
+]
+
+colunas_goleiros = [
+    coluna
+    for coluna in df.columns
+    if any(
+        termo.lower() in coluna.lower()
+        for termo in termos_goleiros
+    )
+]
+
+for coluna in colunas_goleiros:
+    print(coluna)
+
+print("\n===== MÉTRICAS DOS GOLEIROS =====")
+
+print(
+    df_goleiros[
+        [
+            "Player",
+            "Squad",
+            "Min",
+            "GA",
+            "GA90",
+            "Saves",
+            "Save%",
+            "CS",
+            "CS%",
+            "PSxG",
+            "PSxG/SoT",
+            "PSxG+/-",
+            "Stp",
+            "Stp%",
+            "#OPA",
+            "#OPA/90"
+        ]
+    ]
+    .head(15)
+    .to_string(index=False)
+)
+
+features_candidatas_goleiros = [
+    "GA90",
+    "Save%",
+    "CS%",
+    "PSxG/SoT",
+    "PSxG+/-",
+    "Stp%",
+    "#OPA/90",
+    "Launch%"
+]
+
+print("\n===== VALORES AUSENTES - GOLEIROS =====")
+
+print(
+    df_goleiros[
+        features_candidatas_goleiros
+    ]
+    .isna()
+    .sum()
+)
+
+df_goleiros["PSxG+/-_90"] = (
+    df_goleiros["PSxG+/-"]
+    / df_goleiros["90s"]
+)
+
+print("\n===== PSxG+/- POR 90 =====")
+
+print(
+    df_goleiros[
+        [
+            "Player",
+            "Squad",
+            "90s",
+            "PSxG+/-",
+            "PSxG+/-_90"
+        ]
+    ]
+    .sort_values(
+        by="PSxG+/-_90",
+        ascending=False
+    )
+    .head(15)
+    .to_string(index=False)
+)
+
+features_goleiros = [
+    "GA90",
+    "Save%",
+    "CS%",
+    "PSxG/SoT",
+    "PSxG+/-_90",
+    "Stp%",
+    "#OPA/90",
+    "Launch%"
+]
+
+correlacao_goleiros = df_goleiros[
+    features_goleiros
+].corr()
+
+print("\n===== CORRELAÇÃO ENTRE FEATURES DOS GOLEIROS =====")
+
+print(
+    correlacao_goleiros
+    .round(2)
+    .to_string()
+)
+
+scaler_goleiros = StandardScaler()
+
+features_goleiros_padronizadas = (
+    scaler_goleiros.fit_transform(
+        df_goleiros[features_goleiros]
+    )
+)
+
+print("\n===== PADRONIZAÇÃO DOS GOLEIROS =====")
+
+print(
+    "Formato da matriz:",
+    features_goleiros_padronizadas.shape
+)
+
+print(
+    "Quantidade de goleiros:",
+    len(df_goleiros)
+)
+
+print(
+    "Quantidade de features:",
+    len(features_goleiros)
+)
+
+print("\n===== GOLEIRO DE REFERÊNCIA =====")
+
+goleiro_referencia = "Alisson"
+
+alisson = df_goleiros[
+    df_goleiros["Player"] == goleiro_referencia
+]
+
+print(
+    alisson[
+        [
+            "Player",
+            "Squad",
+            "Comp",
+            "Min"
+        ]
+    ].to_string(index=False)
+)
+
+print(
+    "\nQuantidade de registros:",
+    len(alisson)
+)
+
+indice_alisson = alisson.index[0]
+
+posicao_alisson = df_goleiros.index.get_loc(
+    indice_alisson
+)
+
+print(
+    "Índice original:",
+    indice_alisson
+)
+
+print(
+    "Posição na matriz:",
+    posicao_alisson
+)
+
+vetor_alisson = features_goleiros_padronizadas[
+    posicao_alisson
+]
+
+distancias_goleiros = np.linalg.norm(
+    features_goleiros_padronizadas
+    - vetor_alisson,
+    axis=1
+)
+
+print("\n===== DISTÂNCIAS DOS GOLEIROS =====")
+
+print(
+    "Distância do Alisson para ele mesmo:",
+    distancias_goleiros[posicao_alisson]
+)
+
+print(
+    "Quantidade de distâncias calculadas:",
+    len(distancias_goleiros)
+)
+
+resultado_alisson = df_goleiros.copy()
+
+resultado_alisson["Distancia"] = distancias_goleiros
+
+resultado_alisson = resultado_alisson[
+    resultado_alisson["Player"] != goleiro_referencia
+].copy()
+
+resultado_alisson = resultado_alisson.sort_values(
+    by="Distancia",
+    ascending=True
+)
+
+print("\n===== TOP 10 GOLEIROS SIMILARES AO ALISSON =====")
+
+print(
+    resultado_alisson[
+        [
+            "Player",
+            "Squad",
+            "Min",
+            "Distancia"
+        ]
+    ]
+    .head(10)
+    .to_string(index=False)
+)
+
+indice_rui_silva = df_goleiros[
+    df_goleiros["Player"] == "Rui Silva"
+].index[0]
+
+posicao_rui_silva = df_goleiros.index.get_loc(
+    indice_rui_silva
+)
+
+vetor_rui_silva = features_goleiros_padronizadas[
+    posicao_rui_silva
+]
+
+diferencas = (
+    vetor_alisson
+    - vetor_rui_silva
+)
+
+quadrados = diferencas ** 2
+
+soma_quadrados = quadrados.sum()
+
+distancia_manual = np.sqrt(
+    soma_quadrados
+)
+
+print("\n===== VALIDAÇÃO MANUAL DA DISTÂNCIA =====")
+
+print(
+    "Diferenças padronizadas:",
+    diferencas
+)
+
+print(
+    "Soma dos quadrados:",
+    soma_quadrados
+)
+
+print(
+    "Distância manual:",
+    distancia_manual
+)
+
+print(
+    "Distância do ranking:",
+    resultado_alisson[
+        resultado_alisson["Player"] == "Rui Silva"
+    ]["Distancia"].iloc[0]
+)
+
+print("\n===== ALISSON x RUI SILVA =====")
+
+comparacao_goleiros = df_goleiros[
+    df_goleiros["Player"].isin(
+        ["Alisson", "Rui Silva"]
+    )
+][
+    ["Player"] + features_goleiros
+]
+
+print(
+    comparacao_goleiros.to_string(
+        index=False
+    )
+)
+
+ederson = df_goleiros[
+    df_goleiros["Player"] == "Ederson"
+]
+
+indice_ederson = ederson.index[0]
+
+posicao_ederson = df_goleiros.index.get_loc(
+    indice_ederson
+)
+
+vetor_ederson = features_goleiros_padronizadas[
+    posicao_ederson
+]
+
+distancias_ederson = np.linalg.norm(
+    features_goleiros_padronizadas
+    - vetor_ederson,
+    axis=1
+)
+
+resultado_ederson = df_goleiros.copy()
+
+resultado_ederson["Distancia"] = distancias_ederson
+
+resultado_ederson = resultado_ederson[
+    resultado_ederson["Player"] != "Ederson"
+].copy()
+
+resultado_ederson = resultado_ederson.sort_values(
+    by="Distancia"
+)
+
+print("\n===== TOP 10 GOLEIROS SIMILARES AO EDERSON =====")
+
+print(
+    resultado_ederson[
+        [
+            "Player",
+            "Squad",
+            "Min",
+            "Distancia"
+        ]
+    ]
+    .head(10)
+    .to_string(index=False)
+)
+
+top10_alisson = set(
+    resultado_alisson
+    .head(10)["Player"]
+)
+
+top10_ederson = set(
+    resultado_ederson
+    .head(10)["Player"]
+)
+
+jogadores_em_comum = (
+    top10_alisson & top10_ederson
+)
+
+print("\n===== ALISSON x EDERSON =====")
+
+print(
+    "Jogadores em comum:",
+    len(jogadores_em_comum),
+    "de 10"
+)
+
+print("\nEm comum:")
+
+for jogador in sorted(jogadores_em_comum):
+    print(jogador)
+
+print("\nSomente no Top 10 do Alisson:")
+
+for jogador in sorted(
+    top10_alisson - top10_ederson
+):
+    print(jogador)
+
+print("\nSomente no Top 10 do Ederson:")
+
+for jogador in sorted(
+    top10_ederson - top10_alisson
+):
+    print(jogador)
+
+def recomendar_goleiros(
+    nome_jogador,
+    quantidade=10,
+    clube=None
+):
+    jogadores_encontrados = df_goleiros[
+        df_goleiros["Player"] == nome_jogador
+    ]
+
+    if len(jogadores_encontrados) == 0:
+        print(
+            f"Jogador '{nome_jogador}' não encontrado."
+        )
+        return None
+
+    if len(jogadores_encontrados) > 1:
+        if clube is None:
+            print(
+                f"Existem {len(jogadores_encontrados)} registros "
+                f"para '{nome_jogador}'. Escolha um clube:"
+            )
+
+            print(
+                jogadores_encontrados[
+                    ["Squad", "Comp", "Pos", "Min"]
+                ].to_string(index=False)
+            )
+
+            return None
+
+        jogadores_encontrados = jogadores_encontrados[
+            jogadores_encontrados["Squad"] == clube
+        ]
+
+        if len(jogadores_encontrados) == 0:
+            print(
+                f"Não foi encontrado '{nome_jogador}' "
+                f"no clube '{clube}'."
+            )
+            return None
+
+    indice = jogadores_encontrados.index[0]
+
+    posicao = df_goleiros.index.get_loc(
+        indice
+    )
+
+    vetor = features_goleiros_padronizadas[
+        posicao
+    ]
+
+    distancias = np.linalg.norm(
+        features_goleiros_padronizadas
+        - vetor,
+        axis=1
+    )
+
+    resultado = df_goleiros.copy()
+
+    resultado["Distancia"] = distancias
+
+    resultado = resultado[
+        resultado["Player"] != nome_jogador
+    ].copy()
+
+    resultado = resultado.sort_values(
+        by="Distancia",
+        ascending=True
+    )
+
+    return resultado.head(quantidade)
+
+teste_goleiros = recomendar_goleiros(
+    "Alisson"
+)
+
+print("\n===== TESTE FINAL DA FUNÇÃO DE GOLEIROS =====")
+
+print(
+    teste_goleiros[
+        [
+            "Player",
+            "Squad",
+            "Min",
+            "Distancia"
+        ]
+    ].to_string(index=False)
+)
