@@ -1501,3 +1501,987 @@ print(
         ["Player", "Squad", "Pos", "Distancia"]
     ].to_string(index=False)
 )
+
+df_defensores = df[
+    (df["Min"] >= 900) &
+    (df["Pos"].str.contains("DF", na=False))
+].copy()
+
+print("\n===== DEFENSORES =====")
+
+print(
+    "Quantidade de registros:",
+    len(df_defensores)
+)
+
+print("\nPosições encontradas:")
+
+print(
+    df_defensores["Pos"]
+    .value_counts()
+    .to_string()
+)
+
+termos_defensivos = [
+    "Tkl",
+    "Int",
+    "Blocks",
+    "Clr",
+    "Err",
+    "Won",
+    "Lost",
+    "Aerial"
+]
+
+colunas_defensivas = [
+    coluna
+    for coluna in df_defensores.columns
+    if any(
+        termo.lower() in coluna.lower()
+        for termo in termos_defensivos
+    )
+]
+
+print("\n===== COLUNAS DEFENSIVAS ENCONTRADAS =====")
+
+for coluna in colunas_defensivas:
+    print(coluna)
+
+comparacao_colunas_defensivas = df_defensores[
+    [
+        "Player",
+        "Blocks",
+        "Blocks_stats_defense",
+        "Int",
+        "Int_stats_misc",
+        "TklW",
+        "TklW_stats_misc"
+    ]
+].head(10)
+
+print("\n===== COMPARAÇÃO DE COLUNAS DEFENSIVAS =====")
+
+print(
+    comparacao_colunas_defensivas.to_string(index=False)
+)
+
+indice_blocks = df.columns.get_loc("Blocks")
+indice_blocks_defense = df.columns.get_loc(
+    "Blocks_stats_defense"
+)
+
+print("\n===== COLUNAS AO REDOR DE Blocks =====")
+
+print(
+    df.columns[
+        max(0, indice_blocks - 5):
+        indice_blocks + 6
+    ].tolist()
+)
+
+print("\n===== COLUNAS AO REDOR DE Blocks_stats_defense =====")
+
+print(
+    df.columns[
+        max(0, indice_blocks_defense - 5):
+        indice_blocks_defense + 6
+    ].tolist()
+)
+
+df_defensores["Tkl_90"] = (
+    df_defensores["Tkl"] / df_defensores["90s"]
+)
+
+df_defensores["TklW_90"] = (
+    df_defensores["TklW"] / df_defensores["90s"]
+)
+
+df_defensores["Int_90"] = (
+    df_defensores["Int"] / df_defensores["90s"]
+)
+
+df_defensores["Blocks_90"] = (
+    df_defensores["Blocks_stats_defense"]
+    / df_defensores["90s"]
+)
+
+df_defensores["Clr_90"] = (
+    df_defensores["Clr"] / df_defensores["90s"]
+)
+
+print("\n===== MÉTRICAS DEFENSIVAS POR 90 =====")
+
+print(
+    df_defensores[
+        [
+            "Player",
+            "Tkl_90",
+            "TklW_90",
+            "Int_90",
+            "Blocks_90",
+            "Clr_90"
+        ]
+    ]
+    .head(10)
+    .to_string(index=False)
+)
+df_defensores["Tkl_90"] = (
+    df_defensores["Tkl"] / df_defensores["90s"]
+)
+
+df_defensores["TklW_90"] = (
+    df_defensores["TklW"] / df_defensores["90s"]
+)
+
+df_defensores["Int_90"] = (
+    df_defensores["Int"] / df_defensores["90s"]
+)
+
+df_defensores["Blocks_90"] = (
+    df_defensores["Blocks_stats_defense"]
+    / df_defensores["90s"]
+)
+
+df_defensores["Clr_90"] = (
+    df_defensores["Clr"] / df_defensores["90s"]
+)
+
+print("\n===== MÉTRICAS DEFENSIVAS POR 90 =====")
+
+print(
+    df_defensores[
+        [
+            "Player",
+            "Tkl_90",
+            "TklW_90",
+            "Int_90",
+            "Blocks_90",
+            "Clr_90"
+        ]
+    ]
+    .head(10)
+    .to_string(index=False)
+)
+
+indice_won = df.columns.get_loc("Won")
+indice_won_percent = df.columns.get_loc("Won%")
+
+print("\n===== COLUNAS AO REDOR DE Won =====")
+
+print(
+    df.columns[
+        max(0, indice_won - 5):
+        indice_won + 6
+    ].tolist()
+)
+
+print("\n===== COLUNAS AO REDOR DE Won% =====")
+
+print(
+    df.columns[
+        max(0, indice_won_percent - 5):
+        indice_won_percent + 6
+    ].tolist()
+)
+
+df_defensores["Won_90"] = (
+    df_defensores["Won"] / df_defensores["90s"]
+)
+
+print("\n===== DUELOS AÉREOS DOS DEFENSORES =====")
+
+print(
+    df_defensores[
+        [
+            "Player",
+            "Squad",
+            "Won_90",
+            "Won%"
+        ]
+    ]
+    .sort_values(
+        by="Won_90",
+        ascending=False
+    )
+    .head(15)
+    .to_string(index=False)
+)
+
+comparacao_desarmes = df_defensores[
+    [
+        "Player",
+        "Squad",
+        "Tkl_90",
+        "TklW_90",
+        "Tkl%"
+    ]
+].copy()
+
+comparacao_desarmes = comparacao_desarmes.sort_values(
+    by="Tkl_90",
+    ascending=False
+)
+
+print("\n===== DESARMES DOS DEFENSORES =====")
+
+print(
+    comparacao_desarmes
+    .head(15)
+    .to_string(index=False)
+)
+
+colunas_progressao_defensores = [
+    coluna
+    for coluna in df_defensores.columns
+    if any(
+        termo.lower() in coluna.lower()
+        for termo in [
+            "PrgP",
+            "PrgC",
+            "Cmp%",
+            "Touches"
+        ]
+    )
+]
+
+print("\n===== COLUNAS DE PROGRESSÃO DOS DEFENSORES =====")
+
+for coluna in colunas_progressao_defensores:
+    print(coluna)
+
+print("\n===== COMPARAÇÃO DAS COLUNAS DE PROGRESSÃO =====")
+
+print(
+    df_defensores[
+        [
+            "Player",
+            "PrgP",
+            "PrgP_stats_passing",
+            "PrgC",
+            "PrgC_stats_possession",
+            "Cmp%",
+            "Touches"
+        ]
+    ]
+    .head(15)
+    .to_string(index=False)
+)
+
+df_defensores["PrgP_90"] = (
+    df_defensores["PrgP"] / df_defensores["90s"]
+)
+
+df_defensores["PrgC_90"] = (
+    df_defensores["PrgC"] / df_defensores["90s"]
+)
+
+df_defensores["Crs_90"] = (
+    df_defensores["Crs"] / df_defensores["90s"]
+)
+
+print("\n===== PROGRESSÃO DOS DEFENSORES =====")
+
+print(
+    df_defensores[
+        [
+            "Player",
+            "Squad",
+            "PrgP_90",
+            "PrgC_90",
+            "Cmp%"
+        ]
+    ]
+    .head(15)
+    .to_string(index=False)
+)
+
+features_defensores = [
+    "Tkl_90",
+    "TklW_90",
+    "Tkl%",
+    "Int_90",
+    "Blocks_90",
+    "Clr_90",
+    "Won_90",
+    "Won%",
+    "PrgP_90",
+    "PrgC_90",
+    "Cmp%"
+]
+
+print("\n===== FEATURES CANDIDATAS DOS DEFENSORES =====")
+print(features_defensores)
+
+print("\n===== VALORES AUSENTES =====")
+
+print(
+    df_defensores[
+        features_defensores
+    ]
+    .isna()
+    .sum()
+)
+
+print(
+    "\nQuantidade de defensores:",
+    len(df_defensores)
+)
+
+correlacao_defensores = df_defensores[
+    features_defensores
+].corr()
+
+print("\n===== CORRELAÇÃO ENTRE FEATURES DOS DEFENSORES =====")
+
+print(
+    correlacao_defensores
+    .round(2)
+    .to_string()
+)
+
+print("\n===== Tkl_90 × TklW_90 =====")
+
+comparacao_tkl = df_defensores[
+    [
+        "Player",
+        "Squad",
+        "Tkl_90",
+        "TklW_90",
+        "Tkl%"
+    ]
+].copy()
+
+comparacao_tkl["Diferenca"] = (
+    comparacao_tkl["Tkl_90"]
+    - comparacao_tkl["TklW_90"]
+)
+
+print(
+    comparacao_tkl
+    .sort_values(
+        by="Diferenca",
+        ascending=False
+    )
+    .head(15)
+    .to_string(index=False)
+)
+
+features_defensores_revisadas = [
+    "Tkl_90",
+    "Tkl%",
+    "Int_90",
+    "Blocks_90",
+    "Clr_90",
+    "Won_90",
+    "Won%",
+    "PrgP_90",
+    "PrgC_90",
+    "Cmp%",
+    "Crs_90"
+]
+
+print("\n===== FEATURES REVISADAS DOS DEFENSORES =====")
+
+print(features_defensores_revisadas)
+
+print(
+    "\nQuantidade de features:",
+    len(features_defensores_revisadas)
+)
+
+scaler_defensores = StandardScaler()
+
+features_defensores_padronizadas = (
+    scaler_defensores.fit_transform(
+        df_defensores[
+            features_defensores_revisadas
+        ]
+    )
+)
+
+print("\n===== PADRONIZAÇÃO DOS DEFENSORES =====")
+
+print(
+    "Formato da matriz:",
+    features_defensores_padronizadas.shape
+)
+
+print(
+    "\nPrimeiro defensor:",
+    df_defensores.iloc[0]["Player"]
+)
+
+print(
+    "\nVetor padronizado:"
+)
+
+print(
+    features_defensores_padronizadas[0]
+)
+
+jogador_referencia_defesa = "Virgil van Dijk"
+
+registro_referencia_defesa = df_defensores[
+    df_defensores["Player"] == jogador_referencia_defesa
+]
+
+print("\n===== DEFENSOR DE REFERÊNCIA =====")
+
+print(
+    registro_referencia_defesa[
+        [
+            "Player",
+            "Squad",
+            "Comp",
+            "Pos",
+            "Min"
+        ]
+    ].to_string(index=False)
+)
+
+print(
+    "\nQuantidade de registros:",
+    len(registro_referencia_defesa)
+)
+
+indice_van_dijk = registro_referencia_defesa.index[0]
+
+posicao_van_dijk = df_defensores.index.get_loc(
+    indice_van_dijk
+)
+
+vetor_van_dijk = (
+    features_defensores_padronizadas[
+        posicao_van_dijk
+    ]
+)
+
+distancias_van_dijk = np.linalg.norm(
+    features_defensores_padronizadas
+    - vetor_van_dijk,
+    axis=1
+)
+
+print("\n===== TESTE DE DISTÂNCIA - VAN DIJK =====")
+
+print(
+    "Índice original:",
+    indice_van_dijk
+)
+
+print(
+    "Posição na matriz:",
+    posicao_van_dijk
+)
+
+print(
+    "Quantidade de distâncias:",
+    len(distancias_van_dijk)
+)
+
+print(
+    "Distância dele para ele mesmo:",
+    distancias_van_dijk[posicao_van_dijk]
+)
+
+resultado_van_dijk = df_defensores.copy()
+
+resultado_van_dijk["Distancia"] = (
+    distancias_van_dijk
+)
+
+resultado_van_dijk = resultado_van_dijk[
+    resultado_van_dijk["Player"]
+    != jogador_referencia_defesa
+].copy()
+
+resultado_van_dijk = (
+    resultado_van_dijk
+    .sort_values(
+        by="Distancia",
+        ascending=True
+    )
+)
+
+print(
+    "\n===== TOP 10 DEFENSORES "
+    "SEMELHANTES A VIRGIL VAN DIJK ====="
+)
+
+print(
+    resultado_van_dijk[
+        [
+            "Player",
+            "Squad",
+            "Comp",
+            "Pos",
+            "Min",
+            "Distancia"
+        ]
+    ]
+    .head(10)
+    .to_string(index=False)
+)
+
+comparacao_van_dijk_tah = df_defensores[
+    df_defensores["Player"].isin(
+        ["Virgil van Dijk", "Jonathan Tah"]
+    )
+][
+    ["Player", "Squad"]
+    + features_defensores_revisadas
+]
+
+print(
+    "\n===== VAN DIJK × JONATHAN TAH ====="
+)
+
+print(
+    comparacao_van_dijk_tah
+    .to_string(index=False)
+)
+
+indice_tah = df_defensores[
+    df_defensores["Player"] == "Jonathan Tah"
+].index[0]
+
+posicao_tah = df_defensores.index.get_loc(
+    indice_tah
+)
+
+vetor_tah = (
+    features_defensores_padronizadas[
+        posicao_tah
+    ]
+)
+
+diferencas = (
+    vetor_van_dijk - vetor_tah
+)
+
+quadrados = diferencas ** 2
+
+soma_quadrados = np.sum(
+    quadrados
+)
+
+distancia_manual = np.sqrt(
+    soma_quadrados
+)
+
+print(
+    "\n===== VALIDAÇÃO MANUAL DA DISTÂNCIA ====="
+)
+
+print(
+    "Diferenças padronizadas:"
+)
+
+print(diferencas)
+
+print(
+    "\nQuadrados das diferenças:"
+)
+
+print(quadrados)
+
+print(
+    "\nSoma dos quadrados:",
+    soma_quadrados
+)
+
+print(
+    "Raiz da soma:",
+    distancia_manual
+)
+
+print(
+    "Distância no ranking:",
+    resultado_van_dijk.iloc[0][
+        "Distancia"
+    ]
+)
+
+scaler_defensores_11 = StandardScaler()
+
+features_defensores_11_padronizadas = (
+    scaler_defensores_11.fit_transform(
+        df_defensores[
+            features_defensores
+        ]
+    )
+)
+
+vetor_van_dijk_11 = (
+    features_defensores_11_padronizadas[
+        posicao_van_dijk
+    ]
+)
+
+distancias_van_dijk_11 = np.linalg.norm(
+    features_defensores_11_padronizadas
+    - vetor_van_dijk_11,
+    axis=1
+)
+
+resultado_van_dijk_11 = df_defensores.copy()
+
+resultado_van_dijk_11["Distancia"] = (
+    distancias_van_dijk_11
+)
+
+resultado_van_dijk_11 = resultado_van_dijk_11[
+    resultado_van_dijk_11["Player"]
+    != jogador_referencia_defesa
+].copy()
+
+resultado_van_dijk_11 = (
+    resultado_van_dijk_11
+    .sort_values(
+        by="Distancia",
+        ascending=True
+    )
+)
+
+print(
+    "\n===== TOP 10 VAN DIJK - 11 FEATURES ====="
+)
+
+print(
+    resultado_van_dijk_11[
+        ["Player", "Squad", "Distancia"]
+    ]
+    .head(10)
+    .to_string(index=False)
+)
+
+top10_10_features = (
+    resultado_van_dijk
+    .head(10)["Player"]
+    .tolist()
+)
+
+top10_11_features = (
+    resultado_van_dijk_11
+    .head(10)["Player"]
+    .tolist()
+)
+
+jogadores_em_comum = set(
+    top10_10_features
+).intersection(
+    top10_11_features
+)
+
+print(
+    "\n===== ANÁLISE DE SENSIBILIDADE ====="
+)
+
+print(
+    "Jogadores em comum:",
+    len(jogadores_em_comum),
+    "de 10"
+)
+
+print(
+    "\nJogadores presentes nos dois rankings:"
+)
+
+for jogador in jogadores_em_comum:
+    print(jogador)
+
+print(
+    "\nSomente no modelo de 10 features:"
+)
+
+for jogador in top10_10_features:
+    if jogador not in top10_11_features:
+        print(jogador)
+
+print(
+    "\nSomente no modelo de 11 features:"
+)
+
+for jogador in top10_11_features:
+    if jogador not in top10_10_features:
+        print(jogador)
+
+teste_ait_nouri = df_defensores[
+    df_defensores["Player"] == "Rayan Aït-Nouri"
+]
+
+print("\n===== SEGUNDO DEFENSOR DE REFERÊNCIA =====")
+
+print(
+    teste_ait_nouri[
+        ["Player", "Squad", "Comp", "Pos", "Min"]
+    ].to_string(index=False)
+)
+
+print(
+    "\nQuantidade de registros:",
+    len(teste_ait_nouri)
+)
+
+indice_ait_nouri = teste_ait_nouri.index[0]
+
+posicao_ait_nouri = df_defensores.index.get_loc(
+    indice_ait_nouri
+)
+
+vetor_ait_nouri = (
+    features_defensores_padronizadas[
+        posicao_ait_nouri
+    ]
+)
+
+distancias_ait_nouri = np.linalg.norm(
+    features_defensores_padronizadas
+    - vetor_ait_nouri,
+    axis=1
+)
+
+resultado_ait_nouri = df_defensores.copy()
+
+resultado_ait_nouri["Distancia"] = (
+    distancias_ait_nouri
+)
+
+resultado_ait_nouri = resultado_ait_nouri[
+    resultado_ait_nouri["Player"]
+    != "Rayan Aït-Nouri"
+].copy()
+
+resultado_ait_nouri = (
+    resultado_ait_nouri
+    .sort_values(
+        by="Distancia",
+        ascending=True
+    )
+)
+
+print(
+    "\n===== TOP 10 DEFENSORES "
+    "SEMELHANTES A RAYAN AÏT-NOURI ====="
+)
+
+print(
+    resultado_ait_nouri[
+        [
+            "Player",
+            "Squad",
+            "Comp",
+            "Pos",
+            "Min",
+            "Distancia"
+        ]
+    ]
+    .head(10)
+    .to_string(index=False)
+)
+
+top10_van_dijk = (
+    resultado_van_dijk
+    .head(10)["Player"]
+    .tolist()
+)
+
+top10_ait_nouri = (
+    resultado_ait_nouri
+    .head(10)["Player"]
+    .tolist()
+)
+
+jogadores_em_comum_defesa = set(
+    top10_van_dijk
+).intersection(
+    top10_ait_nouri
+)
+
+print(
+    "\n===== VAN DIJK × AÏT-NOURI ====="
+)
+
+print(
+    "Jogadores em comum:",
+    len(jogadores_em_comum_defesa),
+    "de 10"
+)
+
+print(
+    "\nJogadores presentes nos dois rankings:"
+)
+
+for jogador in jogadores_em_comum_defesa:
+    print(jogador)
+
+def recomendar_defensores(
+    nome_jogador,
+    quantidade=10,
+    clube=None
+):
+    jogadores_encontrados = df_defensores[
+        df_defensores["Player"] == nome_jogador
+    ]
+
+    if len(jogadores_encontrados) == 0:
+        print(
+            f"Jogador '{nome_jogador}' não encontrado."
+        )
+        return None
+
+    if len(jogadores_encontrados) > 1:
+        if clube is None:
+            print(
+                f"Existem {len(jogadores_encontrados)} registros "
+                f"para '{nome_jogador}'. Escolha um clube:"
+            )
+
+            print(
+                jogadores_encontrados[
+                    ["Squad", "Comp", "Pos", "Min"]
+                ].to_string(index=False)
+            )
+
+            return None
+
+        jogadores_encontrados = jogadores_encontrados[
+            jogadores_encontrados["Squad"] == clube
+        ]
+
+        if len(jogadores_encontrados) == 0:
+            print(
+                f"Não foi encontrado '{nome_jogador}' "
+                f"no clube '{clube}'."
+            )
+            return None
+
+    indice = jogadores_encontrados.index[0]
+
+    posicao = df_defensores.index.get_loc(
+        indice
+    )
+
+    vetor = features_defensores_padronizadas[
+        posicao
+    ]
+
+    distancias = np.linalg.norm(
+        features_defensores_padronizadas
+        - vetor,
+        axis=1
+    )
+
+    resultado = df_defensores.copy()
+
+    resultado["Distancia"] = distancias
+
+    resultado = resultado[
+        resultado["Player"] != nome_jogador
+    ].copy()
+
+    resultado = resultado.sort_values(
+        by="Distancia",
+        ascending=True
+    )
+
+    return resultado.head(quantidade)
+
+colunas_cruzamentos = [
+    coluna
+    for coluna in df.columns
+    if any(
+        termo.lower() in coluna.lower()
+        for termo in [
+            "Crs",
+            "Cross"
+        ]
+    )
+]
+
+print("\n===== COLUNAS RELACIONADAS A CRUZAMENTOS =====")
+
+for coluna in colunas_cruzamentos:
+    print(coluna)
+
+print("\n===== COMPARAÇÃO DAS MÉTRICAS DE CRUZAMENTO =====")
+
+print(
+    df_defensores[
+        [
+            "Player",
+            "Squad",
+            "Crs",
+            "Crs_stats_misc",
+            "CrsPA"
+        ]
+    ]
+    .head(15)
+    .to_string(index=False)
+)
+
+indice_crspa = df.columns.get_loc("CrsPA")
+
+print("\n===== COLUNAS AO REDOR DE CrsPA =====")
+
+print(
+    df.columns[
+        max(0, indice_crspa - 5):
+        indice_crspa + 6
+    ].tolist()
+)
+
+df_defensores["Crs_90"] = (
+    df_defensores["Crs"]
+    / df_defensores["90s"]
+)
+
+print("\n===== CRUZAMENTOS POR 90 =====")
+
+print(
+    df_defensores[
+        [
+            "Player",
+            "Squad",
+            "Pos",
+            "Crs_90"
+        ]
+    ]
+    .sort_values(
+        by="Crs_90",
+        ascending=False
+    )
+    .head(20)
+    .to_string(index=False)
+)
+
+scaler_defensores = StandardScaler()
+
+features_defensores_padronizadas = (
+    scaler_defensores.fit_transform(
+        df_defensores[features_defensores_revisadas]
+    )
+)
+
+print(
+    "Formato final da matriz de defensores:",
+    features_defensores_padronizadas.shape
+)
+
+teste_defensores = recomendar_defensores(
+    "Virgil van Dijk"
+)
+
+print("\n===== TESTE FINAL DA FUNÇÃO DE DEFENSORES =====")
+
+print(
+    teste_defensores[
+        [
+            "Player",
+            "Squad",
+            "Pos",
+            "Min",
+            "Distancia"
+        ]
+    ].to_string(index=False)
+)
