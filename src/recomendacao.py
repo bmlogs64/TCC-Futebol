@@ -110,37 +110,32 @@ def recomendar_meias(
     ]
 
     if len(jogadores_encontrados) == 0:
-        print(
+        raise ValueError(
             f"Jogador '{nome_jogador}' não encontrado "
             f"no modelo de meio-campistas."
         )
-        return None
 
-    if len(jogadores_encontrados) > 1:
-        if clube is None:
-            print(
-                f"Existem {len(jogadores_encontrados)} registros "
-                f"para '{nome_jogador}'. Escolha um clube:"
-            )
+    if len(jogadores_encontrados) > 1 and clube is None:
+        clubes = jogadores_encontrados[
+            "Squad"
+        ].tolist()
 
-            print(
-                jogadores_encontrados[
-                    ["Squad", "Comp", "Pos", "Min"]
-                ].to_string(index=False)
-            )
+        raise ValueError(
+            f"Existem {len(jogadores_encontrados)} registros "
+            f"para '{nome_jogador}'. "
+            f"Escolha um clube: {', '.join(clubes)}."
+        )
 
-            return None
-
+    if clube is not None:
         jogadores_encontrados = jogadores_encontrados[
             jogadores_encontrados["Squad"] == clube
         ]
 
-        if len(jogadores_encontrados) == 0:
-            print(
-                f"Não foi encontrado '{nome_jogador}' "
-                f"no clube '{clube}'."
-            )
-            return None
+    if len(jogadores_encontrados) == 0:
+        raise ValueError(
+            f"Não foi encontrado '{nome_jogador}' "
+            f"no clube '{clube}'."
+        )
 
     indice = jogadores_encontrados.index[0]
 
@@ -220,37 +215,32 @@ def recomendar_atacantes(
     ]
 
     if len(jogadores_encontrados) == 0:
-        print(
+        raise ValueError(
             f"Jogador '{nome_jogador}' não encontrado "
             f"no modelo de atacantes."
         )
-        return None
 
-    if len(jogadores_encontrados) > 1:
-        if clube is None:
-            print(
-                f"Existem {len(jogadores_encontrados)} registros "
-                f"para '{nome_jogador}'. Escolha um clube:"
-            )
+    if len(jogadores_encontrados) > 1 and clube is None:
+        clubes = jogadores_encontrados[
+            "Squad"
+        ].tolist()
 
-            print(
-                jogadores_encontrados[
-                    ["Squad", "Comp", "Pos", "Min"]
-                ].to_string(index=False)
-            )
+        raise ValueError(
+            f"Existem {len(jogadores_encontrados)} registros "
+            f"para '{nome_jogador}'. "
+            f"Escolha um clube: {', '.join(clubes)}."
+        )
 
-            return None
-
+    if clube is not None:
         jogadores_encontrados = jogadores_encontrados[
             jogadores_encontrados["Squad"] == clube
         ]
 
-        if len(jogadores_encontrados) == 0:
-            print(
-                f"Não foi encontrado '{nome_jogador}' "
-                f"no clube '{clube}'."
-            )
-            return None
+    if len(jogadores_encontrados) == 0:
+        raise ValueError(
+            f"Não foi encontrado '{nome_jogador}' "
+            f"no clube '{clube}'."
+        )
 
     indice = jogadores_encontrados.index[0]
 
@@ -347,37 +337,32 @@ def recomendar_defensores(
     ]
 
     if len(jogadores_encontrados) == 0:
-        print(
+        raise ValueError(
             f"Jogador '{nome_jogador}' não encontrado "
             f"no modelo de defensores."
         )
-        return None
 
-    if len(jogadores_encontrados) > 1:
-        if clube is None:
-            print(
-                f"Existem {len(jogadores_encontrados)} registros "
-                f"para '{nome_jogador}'. Escolha um clube:"
-            )
+    if len(jogadores_encontrados) > 1 and clube is None:
+        clubes = jogadores_encontrados[
+            "Squad"
+        ].tolist()
 
-            print(
-                jogadores_encontrados[
-                    ["Squad", "Comp", "Pos", "Min"]
-                ].to_string(index=False)
-            )
+        raise ValueError(
+            f"Existem {len(jogadores_encontrados)} registros "
+            f"para '{nome_jogador}'. "
+            f"Escolha um clube: {', '.join(clubes)}."
+        )
 
-            return None
-
+    if clube is not None:
         jogadores_encontrados = jogadores_encontrados[
             jogadores_encontrados["Squad"] == clube
         ]
 
-        if len(jogadores_encontrados) == 0:
-            print(
-                f"Não foi encontrado '{nome_jogador}' "
-                f"no clube '{clube}'."
-            )
-            return None
+    if len(jogadores_encontrados) == 0:
+        raise ValueError(
+            f"Não foi encontrado '{nome_jogador}' "
+            f"no clube '{clube}'."
+        )
 
     indice = jogadores_encontrados.index[0]
 
@@ -443,37 +428,32 @@ def recomendar_goleiros(
     ]
 
     if len(jogadores_encontrados) == 0:
-        print(
+        raise ValueError(
             f"Jogador '{nome_jogador}' não encontrado "
             f"no modelo de goleiros."
         )
-        return None
 
-    if len(jogadores_encontrados) > 1:
-        if clube is None:
-            print(
-                f"Existem {len(jogadores_encontrados)} registros "
-                f"para '{nome_jogador}'. Escolha um clube:"
-            )
+    if len(jogadores_encontrados) > 1 and clube is None:
+        clubes = jogadores_encontrados[
+            "Squad"
+        ].tolist()
 
-            print(
-                jogadores_encontrados[
-                    ["Squad", "Comp", "Pos", "Min"]
-                ].to_string(index=False)
-            )
+        raise ValueError(
+            f"Existem {len(jogadores_encontrados)} registros "
+            f"para '{nome_jogador}'. "
+            f"Escolha um clube: {', '.join(clubes)}."
+        )
 
-            return None
-
+    if clube is not None:
         jogadores_encontrados = jogadores_encontrados[
             jogadores_encontrados["Squad"] == clube
         ]
 
-        if len(jogadores_encontrados) == 0:
-            print(
-                f"Não foi encontrado '{nome_jogador}' "
-                f"no clube '{clube}'."
-            )
-            return None
+    if len(jogadores_encontrados) == 0:
+        raise ValueError(
+            f"Não foi encontrado '{nome_jogador}' "
+            f"no clube '{clube}'."
+        )
 
     indice = jogadores_encontrados.index[0]
 
@@ -504,3 +484,30 @@ def recomendar_goleiros(
     )
 
     return resultado.head(quantidade)
+
+MODELOS = {
+    "meio": recomendar_meias,
+    "atacante": recomendar_atacantes,
+    "defensor": recomendar_defensores,
+    "goleiro": recomendar_goleiros
+}
+
+def recomendar(
+    nome_jogador,
+    modelo,
+    quantidade=10,
+    clube=None
+):
+    if modelo not in MODELOS:
+        raise ValueError(
+            f"Modelo '{modelo}' inválido. "
+            f"Escolha entre: {', '.join(MODELOS.keys())}."
+        )
+
+    funcao_recomendacao = MODELOS[modelo]
+
+    return funcao_recomendacao(
+        nome_jogador=nome_jogador,
+        quantidade=quantidade,
+        clube=clube
+    )
