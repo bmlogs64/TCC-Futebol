@@ -461,36 +461,3 @@ def recomendar(
         quantidade=quantidade,
         clube=clube
     )
-
-testes_finais = [
-    ("Kylian Mbappé", "atacante"),
-    ("Kevin De Bruyne", "meio"),
-    ("Virgil van Dijk", "defensor"),
-    ("Alisson", "goleiro")
-]
-
-for nome, modelo in testes_finais:
-
-    print(
-        f"\n=== RANKING FINAL - {nome.upper()} ==="
-    )
-
-    resultado = recomendar(
-        nome_jogador=nome,
-        modelo=modelo,
-        quantidade=10
-    )
-
-    print(
-        resultado[
-            [
-                "Player",
-                "Squad",
-                "market_value_in_eur",
-                "ScoreTecnicoRelativo",
-                "ScoreFinanceiro",
-                "ScoreTecnicoFinanceiro"
-            ]
-        ]
-        .to_string(index=False)
-    )
