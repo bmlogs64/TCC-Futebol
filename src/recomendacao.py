@@ -10,12 +10,17 @@ caminho_csv = os.path.join(
     caminho_atual,
     "..",
     "data",
-    "players_data-2024_2025.csv"
+    "players_data-2024_2025_com_valores.csv"
 )
 
 df = pd.read_csv(caminho_csv)
 
 MINUTOS_MINIMOS = 900
+
+TAMANHO_POOL_TECNICO = 30
+
+PESO_TECNICO = 0.60
+PESO_FINANCEIRO = 0.40
 
 df = df[
     df["Min"] >= MINUTOS_MINIMOS
@@ -100,7 +105,6 @@ features_meias_padronizadas = (
     )
 )
 
-
 def recomendar_jogadores(
     nome_jogador,
     df_posicao,
@@ -145,6 +149,10 @@ def recomendar_jogadores(
 
     vetor = features_padronizadas[posicao]
 
+    valor_referencia = jogadores_encontrados.iloc[0][
+    "market_value_in_eur"
+]
+
     distancias = np.linalg.norm(
         features_padronizadas - vetor,
         axis=1
@@ -153,6 +161,44 @@ def recomendar_jogadores(
     resultado = df_posicao.copy()
 
     resultado["Distancia"] = distancias
+
+    numero_features = features_padronizadas.shape[1]
+
+    resultado["DistanciaNormalizada"] = (
+        resultado["Distancia"]
+        / np.sqrt(numero_features)
+    )
+
+    resultado["ScoreTecnico"] = (
+        1
+        / (
+            1
+            + resultado["DistanciaNormalizada"]
+        )
+    )
+
+    resultado["ValorReferencia"] = valor_referencia
+
+    if (
+        pd.notna(valor_referencia)
+        and valor_referencia > 0
+    ):
+        resultado["EconomiaRelativa"] = (
+            valor_referencia
+            - resultado["market_value_in_eur"]
+        ) / valor_referencia
+
+        resultado["ScoreFinanceiro"] = (
+            valor_referencia
+            / (
+                valor_referencia
+                + resultado["market_value_in_eur"]
+            )
+        )
+
+    else:
+        resultado["EconomiaRelativa"] = np.nan
+        resultado["ScoreFinanceiro"] = np.nan
 
     resultado = resultado[
         resultado["Player"] != nome_jogador
@@ -163,7 +209,58 @@ def recomendar_jogadores(
         ascending=True
     )
 
-    return resultado.head(quantidade)
+    candidatos_tecnicos = resultado.head(
+        TAMANHO_POOL_TECNICO
+    ).copy()
+
+    min_tecnico = candidatos_tecnicos[
+        "ScoreTecnico"
+    ].min()
+
+    max_tecnico = candidatos_tecnicos[
+        "ScoreTecnico"
+    ].max()
+
+    if max_tecnico > min_tecnico:
+        candidatos_tecnicos[
+            "ScoreTecnicoRelativo"
+        ] = (
+            candidatos_tecnicos["ScoreTecnico"]
+            - min_tecnico
+        ) / (
+            max_tecnico
+            - min_tecnico
+        )
+    else:
+        candidatos_tecnicos[
+            "ScoreTecnicoRelativo"
+        ] = 1.0
+
+
+    candidatos_tecnicos = candidatos_tecnicos[
+        candidatos_tecnicos["ScoreTecnicoRelativo"] >= 0.50
+    ].copy()
+
+    candidatos_tecnicos = candidatos_tecnicos[
+        candidatos_tecnicos["ScoreFinanceiro"].notna()
+    ].copy()
+
+    candidatos_tecnicos["ScoreTecnicoFinanceiro"] = (
+        PESO_TECNICO
+        * candidatos_tecnicos["ScoreTecnicoRelativo"]
+        +
+        PESO_FINANCEIRO
+        * candidatos_tecnicos["ScoreFinanceiro"]
+    )
+
+    candidatos_tecnicos = candidatos_tecnicos.sort_values(
+        by="ScoreTecnicoFinanceiro",
+        ascending=False
+    )
+
+    return candidatos_tecnicos.head(
+        quantidade
+    )
 
 def recomendar_meias(
     nome_jogador,
@@ -365,28 +462,35 @@ def recomendar(
         clube=clube
     )
 
-print("\n=== TESTE MEIO-CAMPISTA ===")
-resultado = recomendar(
-    nome_jogador="Kevin De Bruyne",
-    modelo="meio",
-    quantidade=3
-)
+testes_finais = [
+    ("Kylian Mbappé", "atacante"),
+    ("Kevin De Bruyne", "meio"),
+    ("Virgil van Dijk", "defensor"),
+    ("Alisson", "goleiro")
+]
 
-print(
-    resultado[
-        ["Player", "Squad", "Distancia"]
-    ]
-)
+for nome, modelo in testes_finais:
 
-print("\n=== TESTE ATACANTE ===")
-resultado = recomendar(
-    nome_jogador="Kylian Mbappé",
-    modelo="atacante",
-    quantidade=3
-)
+    print(
+        f"\n=== RANKING FINAL - {nome.upper()} ==="
+    )
 
-print(
-    resultado[
-        ["Player", "Squad", "Distancia"]
-    ]
-)
+    resultado = recomendar(
+        nome_jogador=nome,
+        modelo=modelo,
+        quantidade=10
+    )
+
+    print(
+        resultado[
+            [
+                "Player",
+                "Squad",
+                "market_value_in_eur",
+                "ScoreTecnicoRelativo",
+                "ScoreFinanceiro",
+                "ScoreTecnicoFinanceiro"
+            ]
+        ]
+        .to_string(index=False)
+    )
