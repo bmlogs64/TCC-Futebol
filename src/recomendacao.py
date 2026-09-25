@@ -378,7 +378,6 @@ print(
     ]
 )
 
-
 print("\n=== TESTE ATACANTE ===")
 resultado = recomendar(
     nome_jogador="Kylian Mbappé",
