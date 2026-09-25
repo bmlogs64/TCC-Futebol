@@ -100,25 +100,27 @@ features_meias_padronizadas = (
     )
 )
 
-def recomendar_meias(
+
+def recomendar_jogadores(
     nome_jogador,
+    df_posicao,
+    features_padronizadas,
+    nome_modelo,
     quantidade=10,
     clube=None
 ):
-    jogadores_encontrados = df_meias[
-        df_meias["Player"] == nome_jogador
+    jogadores_encontrados = df_posicao[
+        df_posicao["Player"] == nome_jogador
     ]
 
     if len(jogadores_encontrados) == 0:
         raise ValueError(
             f"Jogador '{nome_jogador}' não encontrado "
-            f"no modelo de meio-campistas."
+            f"no modelo de {nome_modelo}."
         )
 
     if len(jogadores_encontrados) > 1 and clube is None:
-        clubes = jogadores_encontrados[
-            "Squad"
-        ].tolist()
+        clubes = jogadores_encontrados["Squad"].tolist()
 
         raise ValueError(
             f"Existem {len(jogadores_encontrados)} registros "
@@ -139,20 +141,16 @@ def recomendar_meias(
 
     indice = jogadores_encontrados.index[0]
 
-    posicao = df_meias.index.get_loc(
-        indice
-    )
+    posicao = df_posicao.index.get_loc(indice)
 
-    vetor = features_meias_padronizadas[
-        posicao
-    ]
+    vetor = features_padronizadas[posicao]
 
     distancias = np.linalg.norm(
-        features_meias_padronizadas - vetor,
+        features_padronizadas - vetor,
         axis=1
     )
 
-    resultado = df_meias.copy()
+    resultado = df_posicao.copy()
 
     resultado["Distancia"] = distancias
 
@@ -166,6 +164,20 @@ def recomendar_meias(
     )
 
     return resultado.head(quantidade)
+
+def recomendar_meias(
+    nome_jogador,
+    quantidade=10,
+    clube=None
+):
+    return recomendar_jogadores(
+        nome_jogador=nome_jogador,
+        df_posicao=df_meias,
+        features_padronizadas=features_meias_padronizadas,
+        nome_modelo="meio-campistas",
+        quantidade=quantidade,
+        clube=clube
+    )
 
 df_atacantes["Gls_90"] = (
     df_atacantes["Gls"] / df_atacantes["90s"]
@@ -210,67 +222,14 @@ def recomendar_atacantes(
     quantidade=10,
     clube=None
 ):
-    jogadores_encontrados = df_atacantes[
-        df_atacantes["Player"] == nome_jogador
-    ]
-
-    if len(jogadores_encontrados) == 0:
-        raise ValueError(
-            f"Jogador '{nome_jogador}' não encontrado "
-            f"no modelo de atacantes."
-        )
-
-    if len(jogadores_encontrados) > 1 and clube is None:
-        clubes = jogadores_encontrados[
-            "Squad"
-        ].tolist()
-
-        raise ValueError(
-            f"Existem {len(jogadores_encontrados)} registros "
-            f"para '{nome_jogador}'. "
-            f"Escolha um clube: {', '.join(clubes)}."
-        )
-
-    if clube is not None:
-        jogadores_encontrados = jogadores_encontrados[
-            jogadores_encontrados["Squad"] == clube
-        ]
-
-    if len(jogadores_encontrados) == 0:
-        raise ValueError(
-            f"Não foi encontrado '{nome_jogador}' "
-            f"no clube '{clube}'."
-        )
-
-    indice = jogadores_encontrados.index[0]
-
-    posicao = df_atacantes.index.get_loc(
-        indice
+    return recomendar_jogadores(
+        nome_jogador=nome_jogador,
+        df_posicao=df_atacantes,
+        features_padronizadas=features_atacantes_padronizadas,
+        nome_modelo="atacantes",
+        quantidade=quantidade,
+        clube=clube
     )
-
-    vetor = features_atacantes_padronizadas[
-        posicao
-    ]
-
-    distancias = np.linalg.norm(
-        features_atacantes_padronizadas - vetor,
-        axis=1
-    )
-
-    resultado = df_atacantes.copy()
-
-    resultado["Distancia"] = distancias
-
-    resultado = resultado[
-        resultado["Player"] != nome_jogador
-    ].copy()
-
-    resultado = resultado.sort_values(
-        by="Distancia",
-        ascending=True
-    )
-
-    return resultado.head(quantidade)
 
 df_defensores["Tkl_90"] = (
     df_defensores["Tkl"] / df_defensores["90s"]
@@ -332,67 +291,14 @@ def recomendar_defensores(
     quantidade=10,
     clube=None
 ):
-    jogadores_encontrados = df_defensores[
-        df_defensores["Player"] == nome_jogador
-    ]
-
-    if len(jogadores_encontrados) == 0:
-        raise ValueError(
-            f"Jogador '{nome_jogador}' não encontrado "
-            f"no modelo de defensores."
-        )
-
-    if len(jogadores_encontrados) > 1 and clube is None:
-        clubes = jogadores_encontrados[
-            "Squad"
-        ].tolist()
-
-        raise ValueError(
-            f"Existem {len(jogadores_encontrados)} registros "
-            f"para '{nome_jogador}'. "
-            f"Escolha um clube: {', '.join(clubes)}."
-        )
-
-    if clube is not None:
-        jogadores_encontrados = jogadores_encontrados[
-            jogadores_encontrados["Squad"] == clube
-        ]
-
-    if len(jogadores_encontrados) == 0:
-        raise ValueError(
-            f"Não foi encontrado '{nome_jogador}' "
-            f"no clube '{clube}'."
-        )
-
-    indice = jogadores_encontrados.index[0]
-
-    posicao = df_defensores.index.get_loc(
-        indice
+    return recomendar_jogadores(
+        nome_jogador=nome_jogador,
+        df_posicao=df_defensores,
+        features_padronizadas=features_defensores_padronizadas,
+        nome_modelo="defensores",
+        quantidade=quantidade,
+        clube=clube
     )
-
-    vetor = features_defensores_padronizadas[
-        posicao
-    ]
-
-    distancias = np.linalg.norm(
-        features_defensores_padronizadas - vetor,
-        axis=1
-    )
-
-    resultado = df_defensores.copy()
-
-    resultado["Distancia"] = distancias
-
-    resultado = resultado[
-        resultado["Player"] != nome_jogador
-    ].copy()
-
-    resultado = resultado.sort_values(
-        by="Distancia",
-        ascending=True
-    )
-
-    return resultado.head(quantidade)
 
 df_goleiros["PSxG+/-_90"] = (
     df_goleiros["PSxG+/-"]
@@ -423,67 +329,14 @@ def recomendar_goleiros(
     quantidade=10,
     clube=None
 ):
-    jogadores_encontrados = df_goleiros[
-        df_goleiros["Player"] == nome_jogador
-    ]
-
-    if len(jogadores_encontrados) == 0:
-        raise ValueError(
-            f"Jogador '{nome_jogador}' não encontrado "
-            f"no modelo de goleiros."
-        )
-
-    if len(jogadores_encontrados) > 1 and clube is None:
-        clubes = jogadores_encontrados[
-            "Squad"
-        ].tolist()
-
-        raise ValueError(
-            f"Existem {len(jogadores_encontrados)} registros "
-            f"para '{nome_jogador}'. "
-            f"Escolha um clube: {', '.join(clubes)}."
-        )
-
-    if clube is not None:
-        jogadores_encontrados = jogadores_encontrados[
-            jogadores_encontrados["Squad"] == clube
-        ]
-
-    if len(jogadores_encontrados) == 0:
-        raise ValueError(
-            f"Não foi encontrado '{nome_jogador}' "
-            f"no clube '{clube}'."
-        )
-
-    indice = jogadores_encontrados.index[0]
-
-    posicao = df_goleiros.index.get_loc(
-        indice
+    return recomendar_jogadores(
+        nome_jogador=nome_jogador,
+        df_posicao=df_goleiros,
+        features_padronizadas=features_goleiros_padronizadas,
+        nome_modelo="goleiros",
+        quantidade=quantidade,
+        clube=clube
     )
-
-    vetor = features_goleiros_padronizadas[
-        posicao
-    ]
-
-    distancias = np.linalg.norm(
-        features_goleiros_padronizadas - vetor,
-        axis=1
-    )
-
-    resultado = df_goleiros.copy()
-
-    resultado["Distancia"] = distancias
-
-    resultado = resultado[
-        resultado["Player"] != nome_jogador
-    ].copy()
-
-    resultado = resultado.sort_values(
-        by="Distancia",
-        ascending=True
-    )
-
-    return resultado.head(quantidade)
 
 MODELOS = {
     "meio": recomendar_meias,
@@ -511,3 +364,30 @@ def recomendar(
         quantidade=quantidade,
         clube=clube
     )
+
+print("\n=== TESTE MEIO-CAMPISTA ===")
+resultado = recomendar(
+    nome_jogador="Kevin De Bruyne",
+    modelo="meio",
+    quantidade=3
+)
+
+print(
+    resultado[
+        ["Player", "Squad", "Distancia"]
+    ]
+)
+
+
+print("\n=== TESTE ATACANTE ===")
+resultado = recomendar(
+    nome_jogador="Kylian Mbappé",
+    modelo="atacante",
+    quantidade=3
+)
+
+print(
+    resultado[
+        ["Player", "Squad", "Distancia"]
+    ]
+)
