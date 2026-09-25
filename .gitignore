@@ -1,4 +1,6 @@
 __pycache__/
 *.pyc
 .env
+
 data/*.csv
+!data/players_data-2024_2025_com_valores.csv
